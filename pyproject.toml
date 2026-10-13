@@ -1,0 +1,23 @@
+[project]
+name = "human-to-robot-policy"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Ayaan Shanoj", email = "ayaanshanoj1@gmail.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "matplotlib>=3.11.2",
+    "mediapipe>=1.1.0",
+    "numpy>=2.4.6",
+    "opencv-contrib-python>=5.0.0.93",
+    "scipy>=1.17.1",
+]
+
+[project.scripts]
+human-to-robot-policy = "human_to_robot_policy:main"
+
+[build-system]
+requires = ["uv_build>=0.12.18,<0.13.0"]
+build-backend = "uv_build"
