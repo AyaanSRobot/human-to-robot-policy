@@ -1,31 +1,27 @@
+from glob import glob
 import cv2 
+from pathlib import Path
 
-img = cv2.imread("frames/raw/frame_5.jpg")
-gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
+
+detector = cv2.aruco.ArucoDetector(dictionary)
+
+frames = sorted(glob("frames/raw/*.jpg"),key=lambda p: int(Path(p).stem.split("_")[-1])) # retain only the number to sort by number
 
 
-detector_params = cv2.aruco.DetectorParameters()
-dictionaries = [
-    "DICT_4X4_50",
-    "DICT_4X4_100",
-    "DICT_5X5_50",
-    "DICT_5X5_100",
-    "DICT_6X6_50",
-    "DICT_6X6_250",
-    "DICT_7X7_50",
-    "DICT_ARUCO_ORIGINAL",
-]
 
-for name in dictionaries:
-    dictionary = cv2.aruco.getPredefinedDictionary(getattr(cv2.aruco,name))
+detected = 0 # markers detected in imgs
 
-    detector = cv2.aruco.ArucoDetector(dictionary,detector_params)
+for frame in frames:
+    image = cv2.imread(str(frame))
+    if image is None:
+        continue
 
-    corners, ids, rejected = detector.detectMarkers(img)
 
-    if ids is not None: #if the correct dictionary is found, annotate image
-        print(f"Detected using {name}: IDs {ids.flatten()}")
+    corners, ids, _ = detector.detectMarkers(image)
 
-        annotated = img.copy()
-        cv2.aruco.drawDetectedMarkers(annotated, corners, ids)
-        cv2.imwrite(f"detected_{name}.jpg", annotated)
+    if ids is not None and 0 in ids.flatten():
+        detected += 1
+
+print(f"Marker detected in {detected}/{len(frames)} frames")
+print(f"Detection rate: {100 * detected / len(frames):.1f}%")
