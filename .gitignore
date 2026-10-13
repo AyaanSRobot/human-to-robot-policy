@@ -1,0 +1,9 @@
+# Extracted video frames
+frames/
+
+# Raw recordings
+*.MP4
+
+# Python environment
+.venv/
+__pycache__/
