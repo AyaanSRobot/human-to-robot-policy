@@ -101,6 +101,22 @@ frames = []
 failures = 0
 errors = []
 
+
+# set up camera
+
+cam = mujoco.MjvCamera()
+cam.type = mujoco.mjtCamera.mjCAMERA_FREE
+
+# Centre of the table
+cam.lookat[:] = [0.55, 0.0, 0.35]
+
+# Zoom level 
+cam.distance = 0.9
+
+# View - top down
+cam.azimuth = 90
+cam.elevation = -89
+
 with mujoco.Renderer(
     model, height=480, width=640
 ) as renderer:
@@ -116,7 +132,7 @@ with mujoco.Renderer(
         )
         errors.append(error)
 
-        renderer.update_scene(data)
+        renderer.update_scene(data, camera=cam)
         frames.append(renderer.render().copy())
 
 imageio.mimsave(
