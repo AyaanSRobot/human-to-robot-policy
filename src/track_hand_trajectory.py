@@ -6,6 +6,7 @@ from mediapipe.tasks.python import vision
 from glob import glob
 from pathlib import Path
 import csv
+import numpy as np
 
 model_path = "src/models/hand_landmarker.task"
 
@@ -20,6 +21,8 @@ options = HandLandmarkerOptions(base_options=BaseOptions(model_asset_path=model_
 frames = sorted(glob("frames/raw/*.jpg"),key=lambda p: int(Path(p).stem.split("_")[-1])) # retain only the number to sort by number
 
 trajectory = []
+
+grasp_x, grasp_y = np.nan, np.nan
 
 with HandLandmarker.create_from_options(options) as landmarker:
 
@@ -48,10 +51,11 @@ with HandLandmarker.create_from_options(options) as landmarker:
             # grasp midpoint 
             grasp_x = (thumb.x + index.x) / 2
             grasp_y = (thumb.y + index.y) / 2
+        else:
+            grasp_x, grasp_y = np.nan, np.nan
 
-
-            # save trajectory 
-            trajectory.append([timestamp_ms, grasp_x, grasp_y])
+        # save trajectory 
+        trajectory.append([timestamp_ms, grasp_x, grasp_y])
 
 with open("grasp_trajectory.csv", "w", newline="") as f:
     writer = csv.writer(f)
