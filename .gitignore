@@ -7,3 +7,6 @@ frames/
 # Python environment
 .venv/
 __pycache__/
+
+# ML models
+models/
