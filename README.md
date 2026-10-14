@@ -1,0 +1,1 @@
+Menagerie dependency in a sibling directory
