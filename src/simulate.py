@@ -6,12 +6,12 @@ from pathlib import Path
 
 # Adjust these to one clear transport segment
 START_S = 100.0
-END_S = 110.0
+END_S = 101.0
 
 MODEL_PATH = "../../mujoco_menagerie/franka_emika_panda/scene.xml"
 CSV_PATH = "grasp_trajectory.csv"
 
-OUTPUT = Path("results/panda_demo.mp4")
+OUTPUT = Path("results/panda_demo_one_move.mp4")
 OUTPUT.parent.mkdir(parents=True, exist_ok=True)
 
 # 1. Load one recorded trajectory
