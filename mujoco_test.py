@@ -15,4 +15,16 @@ data = mujoco.MjData(model)
 
 print("Panda model loaded successfully!")
 
+print("\nJoints:")
+for i in range(model.njnt):
+    print(i, mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_JOINT, i))
+
+print("\nActuators:")
+for i in range(model.nu):
+    print(i, mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_ACTUATOR, i))
+
+print("\nBodies:")
+for i in range(model.nbody):
+    print(i, mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, i))
+
 #AI test script
