@@ -40,23 +40,61 @@ The accuracy of the task was checked in track_hand.py by checking if it could pr
 
 Running mode of Video was used as the goal was to map out a hand trajectory. The track_hand_trajectory script found the TCP as the midpoint between the thumb and index finger. The motion within the dataset was a pick and place operation with some manipulation as well using primarily the thumb and index finger. 
 ![hand_trajectory](results/hand_trajectory.png)
-<em>Hand trajectory generated<\em>
+<em>Hand trajectory generated</em>
 
 In order to make sure that the motion scaled well with the video footage, a perspective homography was computed to express the detected hand positions in a tabletop-referenced coordinate system. As seen later, the resulting tranformed trajectories produced more pronounced movements. Since the hand moved above the marker, the resulting hand trajectories are approximate planar projections rather than accurate 3D reconstructions.
 
 ![hand_trajectory](results/hand_trajectory_after_homography.png)
-<em>Hand trajectory generated after homography<\em>
+<em>Hand trajectory generated after homography</em>
 
 
 
 ## MuJoCo
+MuJoCo was used to simulate the hand trajectories using a Franka-Eminka Panda manipulator. The mujoco Menagerie dependency was downloaded in a sibling directory. 
 
+From parent:
+```
+git clone --depth 1 --filter=blob:none --sparse \
+  https://github.com/google-deepmind/mujoco_menagerie.git
 
+cd mujoco_menagerie
+git sparse-checkout set franka_emika_panda
+```
+Then:
+```
+cd ../human-to-robot-policy
+uv sync
+```
+The MuJoCo directory contains two initial validation scripts:
 
-Menagerie dependency in a sibling directory
+- **mujoco_test.py** verifies that the Panda model loads successfully and inspects its joints, actuators, and bodies.
+
+- **mujoco_kinematics_test.py** validates the inverse kinematics implementation by defining a target Cartesian end-effector position and iteratively updating the robot's joint configuration using damped least-squares Jacobian inverse kinematics.
+
+The tests establish the foundation for retargeting the extracted human hand trajectories to the Panda manipulator.
+
+## Mapping hand trajectories to the manipulator
+Since we can see some discontinuties in the hand trajectory, segments of contiuous blocks were identified for testing. Interval 1 was from 100.4s to 108.2s with 79 frames, interval 2 from 114.9s to 121.7s with 69 frames and interval 3 from 129.3 to 134.9s with 57 seconds. After extracting the trajectories, it could be seen that the motion of manipulator was still jittery due to noise. Thus, smoothing was added using a Savitzky-Golay filter, a second-order polynomial smoothing filter, to preserve the shape of the movements while preserving any high-frequency tracking noise. 
+
+[(Without smoothing)](results/100.4s_to_108.2s/panda_demo_one_move_with_homography_full_10.mp4)
+
+[(With smoothing)](results/100.4s_to_108.2s/panda_demo_one_move_with_homography_full_10_with_smoothing.mp4)
+
 ## Results
+
+Interval 1: 
+[(Watch demo)](results/100.4s_to_108.2s/panda_demo_one_move_with_homography_full_10_with_smoothing.mp4)
+
 ![Interval_1](documentation/image-1.png)
 
+
+Interval 2: 
+[(Watch demo)](results/114.9_to_121.7s/panda_demo_one_move_with_homography_with_smoothing_interval_2.mp4)
+
 ![Interval_2](documentation/image.png)
+
+
+Interval 3:
+[(Watch demo)](results/129.3s_to_134.9s/panda_demo_one_move_with_homography_with_smoothing_interval_3.mp4)
 
 ![Interval_3](documentation/image-2.png)
