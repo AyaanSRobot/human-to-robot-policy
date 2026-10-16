@@ -6,7 +6,7 @@ from mediapipe.tasks.python import vision
 from glob import glob
 from pathlib import Path
 
-model_path = "src/models/hand_landmarker.task"
+model_path = "src/models/hand_landmarker.task" #add model path here 
 
 BaseOptions = mp.tasks.BaseOptions
 HandLandmarker = mp.tasks.vision.HandLandmarker

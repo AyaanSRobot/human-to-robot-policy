@@ -8,7 +8,7 @@ from pathlib import Path
 import csv
 import numpy as np
 
-model_path = "src/models/hand_landmarker.task"
+model_path = "src/models/hand_landmarker.task" # add model path here
 
 BaseOptions = mp.tasks.BaseOptions
 HandLandmarker = mp.tasks.vision.HandLandmarker

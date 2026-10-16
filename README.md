@@ -23,17 +23,22 @@ MuJoCo Menagerie must be cloned into a sibling directory as explained in the MuJ
 
 The original video should be downloaded separately, and the input path in the extract_frames.py script should be updated to point to the video. The video can be found using the following Drive link: https://drive.google.com/file/d/1FFtHCyHvuH6DKu4hGr0tV8Rxr4cwCoLP/view?usp=sharing
 
-It would also be useful to have a frames folder with the folders raw/ and annotated/ to get the raw frames from extract_frames.py and the 6 annotated hand frames from track_hand.py.
+It would also be useful to have a frames folder within the repository, with the subfolders raw/ and annotated/, to get the raw frames from extract_frames.py and the 6 annotated hand frames from track_hand.py.
 
 The processing pipeline consists of frame extraction, ArUco marker detection, MediaPipe hand tracking, planar homography transformation, trajectory smoothing, and MuJoCo simulation.
+
+To generate grasp trajectories as I did, the HandLandmarker bundle has to be downloaded and the .task file saved under src/models, using https://developers.google.com/edge/mediapipe/solutions/vision/hand_landmarker/index#models
 
 For headless GPU rendering, the simulation can be executed using:
 
 ```bash
 MUJOCO_GL=egl uv run python src/simulate.py
 ```
+The simulation also does not require the frames folder or the original video since it uses the csv files present.
 
 Generated images, trajectories, and simulation videos are saved to their respective output directories.
+
+All Python scripts can be executed from the repository root using uv run python followed by the script's relative path (e.g., uv run python src/track_hand.py).
 
 ## Video processing
 
@@ -66,7 +71,7 @@ Running mode of Video was used as the goal was to map out a hand trajectory. The
 ![hand_trajectory](results/hand_trajectory.png)
 <em>Hand trajectory generated</em>
 
-In order to make sure that the motion scaled well with the video footage, a perspective homography was computed to express the detected hand positions in a tabletop-referenced coordinate system. As seen later, the resulting tranformed trajectories produced more pronounced movements. Since the hand moved above the marker, the resulting hand trajectories are approximate planar projections rather than accurate 3D reconstructions.
+In order to make sure that the motion scaled well with the video footage, a perspective homography was computed to express the detected hand positions in a tabletop-referenced coordinate system. As seen later, the resulting transformed trajectories produced more pronounced movements. Since the hand moved above the marker, the resulting hand trajectories are approximate planar projections rather than accurate 3D reconstructions.
 
 ![hand_trajectory](results/hand_trajectory_after_homography.png)
 <em>Hand trajectory generated after homography</em>
@@ -130,8 +135,8 @@ Interval 3:
 
 ![Interval_3](documentation/image-2.png)
 
-The results show 0 Inverse Kinematics (IK) errors across the intervals, meaning the solver could compute a complete trajectory across the calculated waypoints with a mean positional error of 1.4 mm and maximum position error of around 2 mm foe the generated Cartesian targets across all 3 tests.  
+The results show 0 Inverse Kinematics (IK) errors across the intervals, meaning the solver could compute a complete trajectory across the calculated waypoints with a mean positional error of 1.4 mm and maximum position error of around 2 mm for the generated Cartesian targets across all 3 tests.  
 
-Upon visual inspection, it can be seen that the demos match their corresponding real demo's movement. Interval 2 has strong qualitative agreement in movement direction and pattern between the the real demo and the simulation. Interval 1 shows movement close to the real demo, but it almost looks like the manipulator is moving in the opposite direction, particularly when the hand places the figure upwards. Interval 3 also shows very close motion of the simulation to the original video. The real demos show snippits of the original video, who's original timestamps can be seen screen-recorded snippits. An overhead view was also used as only x and y are used from the grasp trajectory, while z is simulated using a sin wave. 
+Upon visual inspection, it can be seen that the demos match their corresponding real demo's movement. Interval 2 has strong qualitative agreement in movement direction and pattern between the the real demo and the simulation. Interval 1 shows movement close to the real demo, but it almost looks like the manipulator is moving in the opposite direction, particularly when the hand places the figure upwards. Interval 3 also shows very close motion of the simulation to the original video. The real demos show snippets of the original video, whose original timestamps can be seen screen-recorded snippets. An overhead view was also used as only x and y are used from the grasp trajectory, while z is simulated using a sin wave. 
 
 Improvements in tracking could be made with a model with better hand recognition. Also keeping the index and thumb implementation could have led to using simulate the gripper opening and closing using the movements of the thumb and index finger. Similar visual inspection should be done to more segments, ideally all 81 segments and if possible, both simulation and real data should be overlayed on one video to calculate tracking error. A possible extension of the project is using a stereo setup to get depth information and generating a 3D point cloud to achieve 3D mapping from hand to manipulator. 
