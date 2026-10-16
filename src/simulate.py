@@ -5,13 +5,13 @@ import imageio.v2 as imageio
 from pathlib import Path
 
 # Adjust these to one clear transport segment
-START_S = 100.4
-END_S = 108.2
+START_S = 114.9
+END_S = 121.7
 
 MODEL_PATH = "../../mujoco_menagerie/franka_emika_panda/scene.xml"
 CSV_PATH = "grasp_trajectory_after_homography.csv"
 
-OUTPUT = Path("results/panda_demo_one_move_with_homography_full_10_with_smoothing.mp4")
+OUTPUT = Path("results/panda_demo_one_move_with_homography_with_smoothing_interval_2.mp4")
 OUTPUT.parent.mkdir(parents=True, exist_ok=True)
 
 # 1. Load one recorded trajectory
