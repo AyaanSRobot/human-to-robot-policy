@@ -11,6 +11,30 @@ Human manipulation demonstrations were personally recorded using a stationary ca
 
 To get all the necessary imports, uv sync is enough after cloning the repository. 
 
+### Environment and execution
+
+The project uses Python with `uv` for dependency management. After cloning the repository, install the dependencies using:
+
+```bash
+uv sync
+```
+
+MuJoCo Menagerie must be cloned into a sibling directory as explained in the MuJoCo section.
+
+The original video should be downloaded separately, and the input path in the extract_frames.py script should be updated to point to the video. The video can be found using the following Drive link:
+
+It would also be useful to have a frames folder with the folders raw/ and annotated/ to get the raw frames from extract_frames.py and the 6 annotated hand frames from track_hand.py.
+
+The processing pipeline consists of frame extraction, ArUco marker detection, MediaPipe hand tracking, planar homography transformation, trajectory smoothing, and MuJoCo simulation.
+
+For headless GPU rendering, the simulation can be executed using:
+
+```bash
+MUJOCO_GL=egl uv run python src/simulate.py
+```
+
+Generated images, trajectories, and simulation videos are saved to their respective output directories.
+
 ## Video processing
 
 The full video was placed outside the cloned repository, but is provided in the repository here. To run the extract_frames script in src, it is recommended that the video is downloaded and saved accordingly or that the "video_path" is modified accordingly. 
@@ -36,7 +60,7 @@ Then, using this dictionary, the detect_marker script checked for a matching ArU
 
 Hand tracking is handled using MediaPipe's Hand landmarker's model bundle which has both a palm detection model and a hand landmarks detection model build using Convolutional Neural Networks (CNNs) (source: https://developers.google.com/edge/mediapipe/solutions/vision/hand_landmarker/index#models). 
 
-The accuracy of the task was checked in track_hand.py by checking if it could produce sucessful hand landmarks within the all detected frames [could it detect a wrong hand?], with the resulting accuracy being 53.6% accuracy. 6 images were also taken across the dataset to see if the wrist, index and thumb were all being detected correctly through visual inspection. 
+The accuracy of the task was checked in track_hand.py by checking if it could produce sucessful hand landmarks within the all detected frames, with the resulting hand detection rate being 53.6%. 6 frames distributed across the recording were also taken across the dataset to see if the wrist, index and thumb were all being detected correctly through visual inspection. 
 
 Running mode of Video was used as the goal was to map out a hand trajectory. The track_hand_trajectory script found the TCP as the midpoint between the thumb and index finger. The motion within the dataset was a pick and place operation with some manipulation as well using primarily the thumb and index finger. 
 ![hand_trajectory](results/hand_trajectory.png)
@@ -50,7 +74,7 @@ In order to make sure that the motion scaled well with the video footage, a pers
 
 
 ## MuJoCo
-MuJoCo was used to simulate the hand trajectories using a Franka-Eminka Panda manipulator. The mujoco Menagerie dependency was downloaded in a sibling directory. 
+MuJoCo was used to simulate the hand trajectories using a Franka Emika Panda manipulator. The mujoco Menagerie dependency was downloaded in a sibling directory. 
 
 From parent:
 ```
@@ -73,8 +97,9 @@ The MuJoCo directory contains two initial validation scripts:
 
 The tests establish the foundation for retargeting the extracted human hand trajectories to the Panda manipulator.
 
+
 ## Mapping hand trajectories to the manipulator
-Since we can see some discontinuties in the hand trajectory, segments of contiuous blocks were identified for testing. Interval 1 was from 100.4s to 108.2s with 79 frames, interval 2 from 114.9s to 121.7s with 69 frames and interval 3 from 129.3 to 134.9s with 57 seconds. After extracting the trajectories, it could be seen that the motion of manipulator was still jittery due to noise. Thus, smoothing was added using a Savitzky-Golay filter, a second-order polynomial smoothing filter, to preserve the shape of the movements while preserving any high-frequency tracking noise. 
+Since we can see some discontinuties in the hand trajectory, segments of contiuous blocks were identified for testing. Interval 1 was from 100.4s to 108.2s with 79 frames, interval 2 from 114.9s to 121.7s with 69 frames and interval 3 from 129.3 to 134.9s with 57 frames. After extracting the trajectories, it could be seen that the motion of manipulator was still jittery due to noise. Thus, smoothing was added using a Savitzky-Golay filter, a second-order polynomial smoothing filter, to preserve the shape of the movements while reducing any high-frequency tracking noise. 
 
 [(Without smoothing)](results/100.4s_to_108.2s/panda_demo_one_move_with_homography_full_10.mp4)
 
@@ -83,7 +108,7 @@ Since we can see some discontinuties in the hand trajectory, segments of contiuo
 ## Results
 
 Interval 1: 
-[(Watch demo)](results/100.4s_to_108.2s/panda_demo_one_move_with_homography_full_10_with_smoothing.mp4)
+[(Watch demo)](results/100.4s_to_108.2s/panda_demo_one_move_with_homography_with_smoothing_interval_(correct_orientation).mp4)
 [(Watch correspond real demo)](results/100.4s_to_108.2s/Screencast%20from%202026-10-14%2021-12-17.mp4)
 
 
@@ -103,8 +128,8 @@ Interval 3:
 
 ![Interval_3](documentation/image-2.png)
 
-The results show 0 Inverse Kinematics (IK) errors across the intervals, meaning the solver could compute a complete trajectory across the calculated waypoints with a  mean positional error within the inverse kinematic solution is also around 1.4 mm for all 3 tests, and maximum position error of around 2 mm. 
+The results show 0 Inverse Kinematics (IK) errors across the intervals, meaning the solver could compute a complete trajectory across the calculated waypoints with a mean positional error of 1.4 mm and maximum position error of around 2 mm fof the generated Cartesian targets across all 3 tests.  
 
-Upon visual inspection, it can be seen that the demos match their corresponding real demo's movement. The camera's orientation in mujoco places the manipulator on the left side while the video has the hand on the right side, which has to be noted when making comparisons between the videos. An overhead view was also used as only x and y are used from the grasp trajectory, while z is simulated using a sin wave. 
+Upon visual inspection, it can be seen that the demos match their corresponding real demo's movement. Interval 2 almost has 1:1 movement between the the real demo and the simulation. Interval 1 shows movement close to the real demo, but it almost looks like the manipulator is moving in the opposite direction, particularly when the hand places the figure upwards. Interval 3 also shows very close motion of the simulation to the original video. The real demos show snippits of the original video, who's original timestamps can be seen screen-recorded snippits. An overhead view was also used as only x and y are used from the grasp trajectory, while z is simulated using a sin wave. 
 
-Improvements in tracking could be made with a model with better hand recognition. Also keeping the index and thumb implementation could have led to using simulate the gripper opening and closing using the movements of the thumb and index finger. 
+Improvements in tracking could be made with a model with better hand recognition. Also keeping the index and thumb implementation could have led to using simulate the gripper opening and closing using the movements of the thumb and index finger. Similar visual inspection should be done to more segments, ideally all 81 segments and if possible, both simulation and real data should be overlayed on one video to calculate tracking error. 
