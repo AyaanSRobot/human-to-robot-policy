@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import csv
 
-# add frame number to grask trajectory csv
+# add frame number to grasp trajectory csv
 
 hand_df = pd.read_csv("grasp_trajectory.csv")
 marker_df = pd.read_csv("marker_corners.csv")
