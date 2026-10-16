@@ -1,9 +1,9 @@
 # Human to robot policy 
 
-The goal of this project wwas to translate human hand motion into manipulator motion using a simple egocentric setup that can be captured from home. 
+The goal of this project was to translate human hand motion into manipulator motion using a simple egocentric setup that can be captured from home. 
 
 ## Setup
-The experiment was conducted at home using a Samsung camera with a 18-55 mm OIS zoom lens set to 18 mm throughout recording, recoding at 50 fps. 
+The experiment was conducted at home using a Samsung camera with a 18-55 mm OIS zoom lens set to 18 mm throughout recording, recording at 50 fps. 
 
 The experiment involved moving around an object in the workspace, with an ArUco marker placed nearby with an ID=0 for later homography.
 
@@ -21,7 +21,7 @@ uv sync
 
 MuJoCo Menagerie must be cloned into a sibling directory as explained in the MuJoCo section.
 
-The original video should be downloaded separately, and the input path in the extract_frames.py script should be updated to point to the video. The video can be found using the following Drive link:
+The original video should be downloaded separately, and the input path in the extract_frames.py script should be updated to point to the video. The video can be found using the following Drive link: https://drive.google.com/file/d/1FFtHCyHvuH6DKu4hGr0tV8Rxr4cwCoLP/view?usp=sharing
 
 It would also be useful to have a frames folder with the folders raw/ and annotated/ to get the raw frames from extract_frames.py and the 6 annotated hand frames from track_hand.py.
 
@@ -60,7 +60,7 @@ Then, using this dictionary, the detect_marker script checked for a matching ArU
 
 Hand tracking is handled using MediaPipe's Hand landmarker's model bundle which has both a palm detection model and a hand landmarks detection model build using Convolutional Neural Networks (CNNs) (source: https://developers.google.com/edge/mediapipe/solutions/vision/hand_landmarker/index#models). 
 
-The accuracy of the task was checked in track_hand.py by checking if it could produce sucessful hand landmarks within the all detected frames, with the resulting hand detection rate being 53.6%. 6 frames distributed across the recording were also taken across the dataset to see if the wrist, index and thumb were all being detected correctly through visual inspection. 
+The hand detection rate was evaluated in track_hand.py by checking if the Hand Landmarker task could produce successful hand landmarks within the all detected frames, with the resulting hand detection rate being 53.6%. 6 frames distributed across the recording were also taken across the dataset to see if the wrist, index and thumb were all being detected correctly through visual inspection. 
 
 Running mode of Video was used as the goal was to map out a hand trajectory. The track_hand_trajectory script found the TCP as the midpoint between the thumb and index finger. The motion within the dataset was a pick and place operation with some manipulation as well using primarily the thumb and index finger. 
 ![hand_trajectory](results/hand_trajectory.png)
@@ -99,7 +99,9 @@ The tests establish the foundation for retargeting the extracted human hand traj
 
 
 ## Mapping hand trajectories to the manipulator
-Since we can see some discontinuties in the hand trajectory, segments of contiuous blocks were identified for testing. Interval 1 was from 100.4s to 108.2s with 79 frames, interval 2 from 114.9s to 121.7s with 69 frames and interval 3 from 129.3 to 134.9s with 57 frames. After extracting the trajectories, it could be seen that the motion of manipulator was still jittery due to noise. Thus, smoothing was added using a Savitzky-Golay filter, a second-order polynomial smoothing filter, to preserve the shape of the movements while reducing any high-frequency tracking noise. 
+Since we can see some discontinuties in the hand trajectory, segments of contiuous blocks were identified for testing. Interval 1 was from 100.4s to 108.2s with 79 frames, interval 2 from 114.9s to 121.7s with 69 frames and interval 3 from 129.3 to 134.9s with 57 frames. The computed hand x and y are used with a small scaling factor of 0.06 to generate the cartesian path from the start of the segment to the end. Since z is not computed in the hand trajectory computation, it is simulated with a sin wave to represent the hand going up and down. 
+
+After extracting the trajectories, it could be seen that the motion of manipulator was still jittery due to noise. Thus, smoothing was added using a Savitzky-Golay filter, a second-order polynomial smoothing filter, to preserve the shape of the movements while reducing any high-frequency tracking noise. 
 
 [(Without smoothing)](results/100.4s_to_108.2s/panda_demo_one_move_with_homography_full_10.mp4)
 
@@ -128,8 +130,8 @@ Interval 3:
 
 ![Interval_3](documentation/image-2.png)
 
-The results show 0 Inverse Kinematics (IK) errors across the intervals, meaning the solver could compute a complete trajectory across the calculated waypoints with a mean positional error of 1.4 mm and maximum position error of around 2 mm fof the generated Cartesian targets across all 3 tests.  
+The results show 0 Inverse Kinematics (IK) errors across the intervals, meaning the solver could compute a complete trajectory across the calculated waypoints with a mean positional error of 1.4 mm and maximum position error of around 2 mm foe the generated Cartesian targets across all 3 tests.  
 
-Upon visual inspection, it can be seen that the demos match their corresponding real demo's movement. Interval 2 almost has 1:1 movement between the the real demo and the simulation. Interval 1 shows movement close to the real demo, but it almost looks like the manipulator is moving in the opposite direction, particularly when the hand places the figure upwards. Interval 3 also shows very close motion of the simulation to the original video. The real demos show snippits of the original video, who's original timestamps can be seen screen-recorded snippits. An overhead view was also used as only x and y are used from the grasp trajectory, while z is simulated using a sin wave. 
+Upon visual inspection, it can be seen that the demos match their corresponding real demo's movement. Interval 2 has strong qualitative agreement in movement direction and pattern between the the real demo and the simulation. Interval 1 shows movement close to the real demo, but it almost looks like the manipulator is moving in the opposite direction, particularly when the hand places the figure upwards. Interval 3 also shows very close motion of the simulation to the original video. The real demos show snippits of the original video, who's original timestamps can be seen screen-recorded snippits. An overhead view was also used as only x and y are used from the grasp trajectory, while z is simulated using a sin wave. 
 
-Improvements in tracking could be made with a model with better hand recognition. Also keeping the index and thumb implementation could have led to using simulate the gripper opening and closing using the movements of the thumb and index finger. Similar visual inspection should be done to more segments, ideally all 81 segments and if possible, both simulation and real data should be overlayed on one video to calculate tracking error. 
+Improvements in tracking could be made with a model with better hand recognition. Also keeping the index and thumb implementation could have led to using simulate the gripper opening and closing using the movements of the thumb and index finger. Similar visual inspection should be done to more segments, ideally all 81 segments and if possible, both simulation and real data should be overlayed on one video to calculate tracking error. A possible extension of the project is using a stereo setup to get depth information and generating a 3D point cloud to achieve 3D mapping from hand to manipulator. 
