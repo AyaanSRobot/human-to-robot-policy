@@ -5,8 +5,8 @@ import imageio.v2 as imageio
 from pathlib import Path
 
 # Adjust these to one clear transport segment
-START_S = 100.0
-END_S = 110.0
+START_S = 100.4
+END_S = 108.2
 
 MODEL_PATH = "../../mujoco_menagerie/franka_emika_panda/scene.xml"
 CSV_PATH = "grasp_trajectory_after_homography.csv"
@@ -22,6 +22,8 @@ demo = df[(df.timestamp_ms >= START_S * 1000) & (df.timestamp_ms <= END_S * 1000
 # Do not bridge large missing-detection gaps
 demo = demo.dropna(subset=["x", "y"])
 
+
+
 if len(demo) < 3:
     raise ValueError("Not enough tracked points in this segment")
 
@@ -29,11 +31,28 @@ if len(demo) < 3:
 time = demo.timestamp_ms.to_numpy() / 1000
 time -= time[0] # normalizing for trajectory to start at t=0
 
+dt = np.diff(time)
+
+print("Maximum time gap:", dt.max())
+print("Median time gap:", np.median(dt))
+
 xy = demo[["x", "y"]].to_numpy(copy=True)
 xy -= xy[0].copy()
 
+# smooth the output
+from scipy.signal import savgol_filter
+
+xy_smooth = savgol_filter(
+    xy,
+    window_length=7,
+    polyorder=2,
+    axis=0
+)
+
+xy_smooth -= xy_smooth[0].copy() # ensures starting position
+
 # Choose an approximate displacement scale initially
-scale = 0.25  # metres per normalized image unit
+scale = 0.06  # metres per normalized image unit
 
 # Synthetic lift trajectory (maximum 4 cm)
 phase = time / time[-1]
@@ -53,8 +72,8 @@ p0 = data.xpos[hand_id].copy()
 
 # 3. Construct desired Cartesian path
 targets = np.column_stack([
-    p0[0] + scale * xy[:, 0], # x
-    p0[1] - scale * xy[:, 1], # y
+    p0[0] + scale * xy_smooth[:, 0], # x
+    p0[1] - scale * xy_smooth[:, 1], # y
     p0[2] + lift              # z
 ])
 
@@ -141,6 +160,7 @@ imageio.mimsave(
     fps=10,
     macro_block_size=16
 )
+
 
 print(f"Video saved to: {OUTPUT}")
 print(f"IK failures: {failures}/{len(targets)}")
