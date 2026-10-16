@@ -6,12 +6,12 @@ from pathlib import Path
 
 # Adjust these to one clear transport segment
 START_S = 100.0
-END_S = 101.0
+END_S = 110.0
 
 MODEL_PATH = "../../mujoco_menagerie/franka_emika_panda/scene.xml"
 CSV_PATH = "grasp_trajectory_after_homography.csv"
 
-OUTPUT = Path("results/panda_demo_one_move_with_homography.mp4")
+OUTPUT = Path("results/panda_demo_one_move_with_homography_full_10.mp4")
 OUTPUT.parent.mkdir(parents=True, exist_ok=True)
 
 # 1. Load one recorded trajectory
@@ -111,7 +111,7 @@ cam.type = mujoco.mjtCamera.mjCAMERA_FREE
 cam.lookat[:] = [0.55, 0.0, 0.35]
 
 # Zoom level 
-cam.distance = 0.9
+cam.distance = 1.5
 
 # View - top down
 cam.azimuth = 90
