@@ -84,17 +84,27 @@ Since we can see some discontinuties in the hand trajectory, segments of contiuo
 
 Interval 1: 
 [(Watch demo)](results/100.4s_to_108.2s/panda_demo_one_move_with_homography_full_10_with_smoothing.mp4)
+[(Watch correspond real demo)](results/100.4s_to_108.2s/Screencast%20from%202026-10-14%2021-12-17.mp4)
+
 
 ![Interval_1](documentation/image-1.png)
 
 
 Interval 2: 
 [(Watch demo)](results/114.9_to_121.7s/panda_demo_one_move_with_homography_with_smoothing_interval_2.mp4)
+[(Watch correspond real demo)](results/114.9_to_121.7s/Screencast%20from%202026-10-16%2018-09-09.mp4)
 
 ![Interval_2](documentation/image.png)
 
 
 Interval 3:
 [(Watch demo)](results/129.3s_to_134.9s/panda_demo_one_move_with_homography_with_smoothing_interval_3.mp4)
+[(Watch correspond real demo)](results/129.3s_to_134.9s/Screencast%20from%202026-10-16%2018-16-02.mp4)
 
 ![Interval_3](documentation/image-2.png)
+
+The results show 0 Inverse Kinematics (IK) errors across the intervals, meaning the solver could compute a complete trajectory across the calculated waypoints with a  mean positional error within the inverse kinematic solution is also around 1.4 mm for all 3 tests, and maximum position error of around 2 mm. 
+
+Upon visual inspection, it can be seen that the demos match their corresponding real demo's movement. The camera's orientation in mujoco places the manipulator on the left side while the video has the hand on the right side, which has to be noted when making comparisons between the videos. An overhead view was also used as only x and y are used from the grasp trajectory, while z is simulated using a sin wave. 
+
+Improvements in tracking could be made with a model with better hand recognition. Also keeping the index and thumb implementation could have led to using simulate the gripper opening and closing using the movements of the thumb and index finger. 
